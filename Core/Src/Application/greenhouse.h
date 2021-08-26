@@ -10,9 +10,10 @@
 
 typedef struct _IconsTypedef
 {
-	uint8_t 	*icon_data[3];
+	uint8_t 		*icon_data[3];
 	uint8_t 		state;
 	uint16_t		xpos,ypos;
+	uint16_t		on_value,off_value;
 }IconsTypedef;
 
 #define	ICON_STATE_IDLE		0

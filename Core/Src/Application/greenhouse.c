@@ -35,6 +35,8 @@ IconsTypedef	Icons[4] =
 				(uint8_t *)fan48_active2 },
 				0,
 				15 , 272,
+				90 , 70 ,
+
 		},
 		{
 				{(uint8_t *)heater48_idle ,
@@ -42,6 +44,7 @@ IconsTypedef	Icons[4] =
 				(uint8_t *)heater48_active2 },
 				0,
 				70 , 272,
+				25 , 30,
 		},
 		{
 				{(uint8_t *)waterpump48_idle ,
@@ -49,6 +52,7 @@ IconsTypedef	Icons[4] =
 				(uint8_t *)waterpump48_active2 },
 				0,
 				125 , 272,
+				70 , 90
 		},
 		{
 				{(uint8_t *)light48_idle ,
@@ -56,13 +60,20 @@ IconsTypedef	Icons[4] =
 				(uint8_t *)light48_active2 },
 				0,
 				180 , 272,
+				120 , 190,
 		},
 
 };
-
+uint8_t	active=0;
+void gotit(void)
+{
+	active++;
+}
 void setIcon(uint8_t icon_index , uint8_t state)
 {
 	Icons[icon_index].state = state;
+	if (( icon_index == ICON_HEATER ) && (state == ICON_STATE_ACTIVE2))
+		gotit();
 	BSP_LCD_DrawBitmap(Icons[icon_index].xpos, Icons[icon_index].ypos, Icons[icon_index].icon_data[state]);
 }
 
@@ -123,27 +134,41 @@ static void GreenH_DisplayOutData(void)
 #define	TEMP_HI			20
 #define	HUMIDITY_LO		60
 #define	HUMIDITY_HI		80
+
 void out_pid (void)
 {
-	if ( DHT_Data.TemperatureH < TEMP_LO )
+	if ( DHT_Data.TemperatureH < Icons[ICON_HEATER].on_value )
 	{
-		setIcon(ICON_HEATER,ICON_STATE_ACTIVE1);
+		if (Icons[ICON_HEATER].state == ICON_STATE_IDLE )
+			setIcon(ICON_HEATER,ICON_STATE_ACTIVE1);
 	}
-	if ( DHT_Data.TemperatureH > TEMP_HI )
+	else
 	{
-		setIcon(ICON_HEATER,ICON_STATE_IDLE);
+		if ( DHT_Data.TemperatureH > Icons[ICON_HEATER].off_value )
+		{
+			if (Icons[ICON_HEATER].state != ICON_STATE_IDLE )
+				setIcon(ICON_HEATER,ICON_STATE_IDLE);
+		}
 	}
 
-	if ( DHT_Data.HumidityH < HUMIDITY_LO )
+	if ( DHT_Data.HumidityH > Icons[ICON_WATERPUMP].off_value )
 	{
-		setIcon(ICON_WATERPUMP,ICON_STATE_ACTIVE1);
+		if (Icons[ICON_WATERPUMP].state != ICON_STATE_IDLE )
+		{
+			setIcon(ICON_WATERPUMP,ICON_STATE_IDLE);
+		}
 	}
-	if ( DHT_Data.HumidityH > HUMIDITY_HI )
+	else
 	{
-		setIcon(ICON_WATERPUMP,ICON_STATE_IDLE);
-		setIcon(ICON_FAN,ICON_STATE_ACTIVE1);
+		if ( DHT_Data.HumidityH < Icons[ICON_WATERPUMP].on_value )
+		{
+			if (Icons[ICON_WATERPUMP].state == ICON_STATE_IDLE )
+			{
+				setIcon(ICON_WATERPUMP,ICON_STATE_ACTIVE1);
+			}
+		}
 	}
-	if (( DHT_Data.HumidityH > HUMIDITY_LO ) && ( DHT_Data.HumidityH < HUMIDITY_HI ))
+	if (( DHT_Data.HumidityH > Icons[ICON_FAN].on_value ) && ( DHT_Data.HumidityH < Icons[ICON_FAN].off_value  ))
 		setIcon(ICON_FAN,ICON_STATE_IDLE);
 }
 
