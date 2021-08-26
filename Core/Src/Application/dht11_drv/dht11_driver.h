@@ -8,7 +8,7 @@
 #ifndef INC_TEMPH_DHT11_DRIVER_H_
 #define INC_TEMPH_DHT11_DRIVER_H_
 
-#define	EXTI_IRQ	EXTI4_IRQn
+#define	EXTI_IRQ	EXTI9_5_IRQn
 
 typedef struct
 {

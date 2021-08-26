@@ -68,30 +68,38 @@ void setIcon(uint8_t icon_index , uint8_t state)
 
 void GreenH_Init(void)
 {
-	  BSP_LCD_Init();
-	  BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER,LCD_FRAME_BUFFER);
-	  BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER,LCD_FRAME_BUFFER);
-	  BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
-	  BSP_LCD_Clear(LCD_COLOR_BLACK);
-	  BSP_LCD_DisplayOn();
-	  BSP_LCD_SetFont(&Font20);
-	  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	  BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
-	  BSP_LCD_DisplayStringAt(0,0,(uint8_t *)"GreenHouse 1.0",CENTER_MODE);
-	  BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
-	  BSP_LCD_SetFont(&Font12);
-	  HAL_TIM_Base_Start(&DHT11_TIMER);
-	  HAL_TIM_Base_Start_IT(&INTERVAL_TIMER);
-	  DHT_Data.dht_reads = 0;
-	  setIcon(ICON_FAN,ICON_STATE_IDLE);
-	  setIcon(ICON_HEATER,ICON_STATE_IDLE);
-	  setIcon(ICON_WATERPUMP,ICON_STATE_IDLE);
-	  setIcon(ICON_LIGHT,ICON_STATE_IDLE);
+uint32_t x,y;
+
+	BSP_LCD_Init();
+	BSP_LCD_LayerDefaultInit(LCD_BACKGROUND_LAYER,LCD_FRAME_BUFFER);
+	BSP_LCD_LayerDefaultInit(LCD_FOREGROUND_LAYER,LCD_FRAME_BUFFER);
+	BSP_LCD_SelectLayer(LCD_FOREGROUND_LAYER);
+	BSP_LCD_Clear(LCD_COLOR_BLACK);
+	BSP_LCD_DisplayOn();
+	BSP_LCD_SetFont(&Font20);
+	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+	BSP_LCD_SetBackColor(LCD_COLOR_BLACK);
+	BSP_LCD_DisplayStringAt(0,0,(uint8_t *)"GreenHouse 1.0",CENTER_MODE);
+	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+	BSP_LCD_SetFont(&Font12);
+	HAL_TIM_Base_Start(&DHT11_TIMER);
+	HAL_TIM_Base_Start_IT(&INTERVAL_TIMER);
+	DHT_Data.dht_reads = 0;
+	setIcon(ICON_FAN,ICON_STATE_IDLE);
+	setIcon(ICON_HEATER,ICON_STATE_IDLE);
+	setIcon(ICON_WATERPUMP,ICON_STATE_IDLE);
+	setIcon(ICON_LIGHT,ICON_STATE_IDLE);
+
+	uint32_t	*ptr=(uint32_t	*)(LCD_FRAME_BUFFER+240*480);
+	for(x=0;x<100;x++)
+	{
+		for(y=0;y<240;y++)
+			*ptr++ = 0xffff0000;
+	}
 }
 
 static void GreenH_ErrorAcqData(void)
 {
-	HAL_GPIO_WritePin(LD4_GPIO_Port,LD4_Pin,GPIO_PIN_SET);
 	BSP_LCD_SetTextColor(LCD_COLOR_RED);
 	BSP_LCD_DisplayStringAt(105,30,(uint8_t *)"Failed",LEFT_MODE);
 	BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
@@ -168,6 +176,7 @@ uint8_t	DataValid = 1;
 		{
 		case 2:	BSP_LCD_DisplayStringAt(105,30,(uint8_t *)"                ",LEFT_MODE); break;
 		case 8 :
+			HAL_GPIO_WritePin(LD4_GPIO_Port,LD4_Pin,GPIO_PIN_SET);
 			if ( DHT_StartAcquisition(&DHT_Data) == 1 )
 			{
 				GreenH_ErrorAcqData();
